@@ -1,0 +1,31 @@
+[build-system]
+requires = [
+  "setuptools>=65.0", # MIT License
+  "wheel",            # MIT License
+]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kp-medizinische-informatik-1"
+version = "0.0.1"
+description = "Course project for the practical course 'Medizinische Informatik 1' at TU Dresden"
+authors = [{ name = "Claas de Boer" }, { name = "Jonas Höpner" }]
+readme = { file = "README.md", content-type = "text/markdown" }
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: OS Independent",
+]
+dependencies = ["psycopg2", "tomli", "click"]
+
+
+[project.urls]
+"Bug Tracker" = "https://github.com/cdboer/kp-medizinische-informatik-ss23/issues"
+
+[project.scripts]
+eda = "eda.eda:cli"
+
+[tool.setuptools.packages.find]
+include = ["eda"]
