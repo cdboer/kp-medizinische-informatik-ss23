@@ -6,7 +6,7 @@ import psycopg2 as pg
 @click.command()
 @click.argument("query", type=click.Path(exists=True))
 @click.argument("output", default="output.csv")
-def eda(query, output):
+def cli(query, output):
     # read query
     query = read_query(query)
     # read config
@@ -36,7 +36,3 @@ def write_csv(fp, data):
     with open(fp, "w") as f:
         for row in data:
             f.write(",".join(map(str, row)) + "\n")
-
-
-if __name__ == "__main__":
-    eda()
