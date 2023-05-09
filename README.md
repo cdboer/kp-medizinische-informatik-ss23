@@ -30,6 +30,15 @@ To install the project's scripts and dependencies, run the following command in 
 pip install -e .
 ```
 ### Usage
+```
+Usage: eda [OPTIONS] QUERY [OUTPUT]
+
+  Run a SQL query and write the output to a CSV file.
+
+Options:
+  --help  Show this message and exit.
+```
+
 ## Dependencies
 
 ## License
