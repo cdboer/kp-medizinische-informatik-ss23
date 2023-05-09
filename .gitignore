@@ -1,3 +1,6 @@
+# Ignore database config file and all other toml files
+*.toml
+
 # Ignore csv files
 *.csv
 
