@@ -12,7 +12,23 @@ The project was directed by Dr. Markus Wolfien and carried out by Jonas Höpner 
 
 ## Getting Started
 ### Prerequisites
+We recommend using a virtual environment to install the project's dependencies.
+To create a virtual environment, run the following command in the project's root directory:
+```
+python -m venv venv
+```
+Activate the virtual environment by running the following command:
+```
+# Windows
+venv\Scripts\activate
+# Linux/macOS
+source venv/bin/activate
+```
 ### Installation
+To install the project's scripts and dependencies, run the following command in the project's root directory:
+```
+pip install -e .
+```
 ### Usage
 ## Dependencies
 
