@@ -25,7 +25,7 @@ dependencies = ["psycopg2", "tomli", "click"]
 "Bug Tracker" = "https://github.com/cdboer/kp-medizinische-informatik-ss23/issues"
 
 [project.scripts]
-eda = "eda.eda:cli"
+eda = "eda.cli:cli"
 
 [tool.setuptools.packages.find]
 include = ["eda"]
