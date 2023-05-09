@@ -7,6 +7,7 @@ import psycopg2 as pg
 @click.argument("query", type=click.Path(exists=True))
 @click.argument("output", default="output.csv")
 def cli(query, output):
+    """Run a SQL query and write the output to a CSV file."""
     # read query
     query = read_query(query)
     # read config
