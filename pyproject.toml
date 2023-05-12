@@ -18,7 +18,7 @@ classifiers = [
   "License :: OSI Approved :: MIT License",
   "Operating System :: OS Independent",
 ]
-dependencies = ["psycopg2", "tomli", "click"]
+dependencies = ["psycopg2", "tomli", "click", "matplotlib", "pandas"]
 
 
 [project.urls]
