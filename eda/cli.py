@@ -18,7 +18,7 @@ def cli(query, output):
     cur = conn.cursor()
     cur.execute(query)
     # write csv output to file
-    write_csv(output, cur.fetchall())
+    write_csv(output, cur.fetchall(), cur.description)
     # close connection
     conn.close()
 
@@ -33,7 +33,8 @@ def read_query(fp):
         return f.read()
 
 
-def write_csv(fp, data):
+def write_csv(fp, data, col_names):
     with open(fp, "w") as f:
+        f.write(",".join(map(lambda x: x.name, col_names)) + "\n")
         for row in data:
             f.write(",".join(map(str, row)) + "\n")
