@@ -1,4 +1,4 @@
-<h1 align="center">⚕️Komplexpraktikum Medizinische Informatik 1 ST23 ⚕️</h1>
+<h1 align="center">⚕️Komplexpraktikum Medizinische Informatik 1⚕️</h1>
 
 This is the code repository for the project "Predicting Sepsis Onset in ICU Patients" by Jonas Höpner and Claas de Boer.
 
