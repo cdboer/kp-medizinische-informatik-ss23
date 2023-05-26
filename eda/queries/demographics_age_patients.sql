@@ -1,1 +1,6 @@
-SELECT a.age::INTEGER, count(distinct a.subject_id) FROM mimiciv_hosp.patients p JOIN mimiciv_derived.age a on p.subject_id = a.subject_id GROUP BY a.age::INTEGER ORDER BY a.age::INTEGER asc;
+SELECT age, gender
+FROM (
+	SELECT p.subject_id, a.age, p.gender, row_number() over (partition by p.subject_id order by a.age) as rn
+	FROM mimiciv_hosp.patients p
+	JOIN mimiciv_derived.age a on p.subject_id = a.subject_id
+) t WHERE rn = 1

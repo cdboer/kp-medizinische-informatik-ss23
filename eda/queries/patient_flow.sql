@@ -1,0 +1,1 @@
+SELECT * FROM mimiciv_derived.transfer_flow LIMIT 1000
