@@ -1,0 +1,7 @@
+psycopg2-binary
+tomli
+matplotlib
+pandas
+numpy
+seaborn
+scipy
