@@ -2,11 +2,11 @@ import psycopg2
 import matplotlib.pyplot as plt
 
 # Connection parameters
-hostname = '***REMOVED***'
+hostname = 'REMOVED'
 port = 5432
 database = 'mimiciv'
 username = 'mimicuser'
-password = '***REMOVED***'
+password = 'REMOVED'
 
 print(" Connect to the PostgreSQL server")
 conn = psycopg2.connect(
