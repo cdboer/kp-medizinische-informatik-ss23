@@ -43,10 +43,14 @@ SELECT MIN(heart_rate) AS heart_rate_min,
             FROM sepsis
         ) THEN 1
         ELSE 0
-    END AS sepsis
+    END AS sepsis,
+    AVG(w.weight) as weight_mean,
+    AVG(w.weight_min) as weight_min,
+    AVG(w.weight_max) as weight_max
 FROM mimiciv_icu.icustays ie
     LEFT JOIN mimiciv_derived.vitalsign vs ON ie.subject_id = vs.subject_id
-    AND vs.charttime >= ie.intime - INTERVAL '6' HOUR
-    AND vs.charttime <= ie.intime + INTERVAL '1' DAY
+        AND vs.charttime >= ie.intime - INTERVAL '6' HOUR
+        AND vs.charttime <= ie.intime + INTERVAL '1' DAY
+    LEFT JOIN mimiciv_derived.first_day_weight w on ie.stay_id = w.stay_id
 GROUP BY ie.subject_id,
     ie.stay_id;
