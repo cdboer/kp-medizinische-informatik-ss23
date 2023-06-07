@@ -43,10 +43,13 @@ SELECT MIN(heart_rate) AS heart_rate_min,
             FROM sepsis
         ) THEN 1
         ELSE 0
-    END AS sepsis
+    END AS sepsis,
+    race
 FROM mimiciv_icu.icustays ie
     LEFT JOIN mimiciv_derived.vitalsign vs ON ie.subject_id = vs.subject_id
-    AND vs.charttime >= ie.intime - INTERVAL '6' HOUR
-    AND vs.charttime <= ie.intime + INTERVAL '1' DAY
+        AND vs.charttime >= ie.intime - INTERVAL '6' HOUR
+        AND vs.charttime <= ie.intime + INTERVAL '1' DAY
+    LEFT JOIN mimiciv_derived.icustay_detail det on det.stay_id = ie.stay_id and det.subject_id = ie.subject_id
 GROUP BY ie.subject_id,
-    ie.stay_id;
+    ie.stay_id,
+    race;
