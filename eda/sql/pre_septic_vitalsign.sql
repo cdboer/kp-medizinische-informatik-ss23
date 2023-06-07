@@ -50,8 +50,9 @@ SELECT MIN(heart_rate) AS heart_rate_min,
     END AS sepsis,
     AVG(w.weight) as weight_mean,
     AVG(w.weight_min) as weight_min,
-    AVG(w.weight_max) as weight_max
-
+    AVG(w.weight_max) as weight_max,
+    AVG(h.height) as height,
+    AVG(a.age) as age
 FROM mimiciv_icu.icustays ie
     LEFT JOIN mimiciv_derived.sepsis3 sepsis ON ie.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.vitalsign vs ON ie.subject_id = vs.subject_id
@@ -68,5 +69,7 @@ FROM mimiciv_icu.icustays ie
             END
         )
     LEFT JOIN mimiciv_derived.first_day_weight w on ie.stay_id = w.stay_id
+    LEFT JOIN mimiciv_derived.first_day_height h on ie.stay_id = h.stay_id
+    LEFT JOIN mimiciv_derived.age a on ie.subject_id = a.subject_id
 GROUP BY ie.subject_id,
     ie.stay_id;
