@@ -1,4 +1,4 @@
--- DROP TABLE IF EXISTS mimiciv_derived.pre_septic_lab_8h; CREATE TABLE mimiciv_derived.pre_septic_lab_8h  AS
+-- DROP TABLE IF EXISTS mimiciv_derived.pre_septic_lab_24h; CREATE TABLE mimiciv_derived.pre_septic_lab_24h  AS
 WITH 
 sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
 
@@ -18,8 +18,8 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         ON ie.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.complete_blood_count le
         ON le.subject_id = ie.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '8' HOUR ELSE ie.intime END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '8' HOUR END
+            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '24' HOUR ELSE ie.intime END
+            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '24' HOUR END
     GROUP BY ie.stay_id
 )
 
@@ -45,8 +45,8 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         ON ie.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.chemistry le
         ON le.subject_id = ie.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '8' HOUR ELSE ie.intime END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '8' HOUR END
+            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '24' HOUR ELSE ie.intime END
+            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '24' HOUR END
     GROUP BY ie.stay_id
 )
 
@@ -75,8 +75,8 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         ON ie.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.blood_differential le
         ON le.subject_id = ie.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '8' HOUR ELSE ie.intime END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '8' HOUR END
+            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '24' HOUR ELSE ie.intime END
+            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '24' HOUR END
     GROUP BY ie.stay_id
 )
 
@@ -94,8 +94,8 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         ON ie.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.coagulation le
         ON le.subject_id = ie.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '8' HOUR ELSE ie.intime END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '8' HOUR END
+            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '24' HOUR ELSE ie.intime END
+            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '24' HOUR END
     GROUP BY ie.stay_id
 )
 
@@ -121,8 +121,8 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         ON ie.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.enzyme le
         ON le.subject_id = ie.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '8' HOUR ELSE ie.intime END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '8' HOUR END
+            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '24' HOUR ELSE ie.intime END
+            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time ELSE ie.intime + INTERVAL '24' HOUR END
     GROUP BY ie.stay_id
 )
 , lab as (
@@ -167,11 +167,11 @@ LEFT JOIN mimiciv_derived.sepsis3 sepsis
     ON ie.stay_id = sepsis.stay_id
 LEFT JOIN mimiciv_derived.vitalsign vs
     ON ie.subject_id = vs.subject_id
-    -- pre septic window defined as 8 hours before sepsis onset
-    -- if no sepsis onset, then 8 hours after ICU admission to get the same window size
+    -- pre septic window defined as 24 hours before sepsis onset
+    -- if no sepsis onset, then 24 hours after ICU admission to get the same window size
     -- resolution could be improved ..
-        AND vs.charttime >= (CASE WHEN sepsis.sofa_time IS NULL THEN ie.intime ELSE sepsis.sofa_time - INTERVAL '8' HOUR END)
-        AND vs.charttime <= (CASE WHEN sepsis.sofa_time IS NULL THEN ie.intime + INTERVAL '8' HOUR ELSE sepsis.sofa_time END)
+        AND vs.charttime >= (CASE WHEN sepsis.sofa_time IS NULL THEN ie.intime ELSE sepsis.sofa_time - INTERVAL '24' HOUR END)
+        AND vs.charttime <= (CASE WHEN sepsis.sofa_time IS NULL THEN ie.intime + INTERVAL '24' HOUR ELSE sepsis.sofa_time END)
 GROUP BY ie.subject_id, ie.stay_id
 )
 SELECT
