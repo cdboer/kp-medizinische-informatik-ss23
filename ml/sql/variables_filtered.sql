@@ -40,6 +40,21 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         AVG(chloride) AS chloride_mean,
         STDDEV(chloride) AS chloride_std,
         
+        MIN(lactate) AS lactate_min,
+        MAX(lactate) AS lactate_max,
+        AVG(lactate) AS lactate_mean,
+        STDDEV(lactate) AS lactatee_std,
+
+        MIN(totalco2) AS totalco2_min,
+        MAX(totalco2) AS totalco2_max,
+        AVG(totalco2) AS totalco2_mean,
+        STDDEV(totalco2) AS totalco2_std,
+
+        MIN(ph) AS ph_min,
+        MAX(ph) AS ph_max,
+        AVG(ph) AS ph_mean,
+        STDDEV(ph) AS ph_std,
+
         
 		ie.stay_id
     FROM mimiciv_icu.icustays ie
