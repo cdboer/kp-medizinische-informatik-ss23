@@ -1,6 +1,6 @@
 -- DROP TABLE IF EXISTS mimiciv_derived.pre_septic_lab_24h; CREATE TABLE mimiciv_derived.pre_septic_lab_24h  AS
 WITH 
-sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_time)
+sepsis AS (SELECT stay_id, sofa_time, sepsis3 FROM mimiciv_derived.sepsis_with_rdm_onset_time)
 
 
 , bga as (
@@ -11,10 +11,6 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
     
     NOTE: When we talk about patients, what we really mean is ICU stays. Patients can have multiple ICU stays as evidenced by the icustays table.
     */
-    WITH sepsis AS (
-        SELECT stay_id
-        FROM mimiciv_derived.sepsis3
-    )
     SELECT 
         MIN(so2) AS so2_min,
         MAX(so2) AS so2_max,
@@ -58,22 +54,11 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
         
 		cs.stay_id
     FROM mimiciv_derived.cohort_selection cs
-        LEFT JOIN mimiciv_derived.sepsis3 sepsis ON cs.stay_id = sepsis.stay_id
         LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
             on cs.stay_id = srt.stay_id
         LEFT JOIN mimiciv_derived.bg bg ON cs.subject_id = bg.subject_id
-        AND bg.charttime >= (
-            CASE
-                WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_size_h)s'
-                ELSE sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR
-            END
-        )
-        AND bg.charttime <= (
-            CASE
-                WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_stop_size_h)s'  HOUR
-                ELSE sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
-            END
-        )
+        AND bg.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
+        AND bg.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
     GROUP BY cs.subject_id,
         cs.stay_id
 )
@@ -88,14 +73,12 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
         , STDDEV(platelet) AS platelets_std
        
     FROM mimiciv_derived.cohort_selection cs
-    LEFT JOIN sepsis
-        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
         on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.complete_blood_count le
         ON le.subject_id = cs.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_size_h)s' END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END
+            AND le.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
+            AND le.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
 
     
     GROUP BY cs.stay_id
@@ -120,14 +103,12 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
         , MIN(potassium) AS potassium_min, MAX(potassium) AS potassium_max
         , AVG(potassium) AS potassium_avg, STDDEV(potassium) AS potassium_std
     FROM mimiciv_derived.cohort_selection cs
-    LEFT JOIN sepsis
-        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
             on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.chemistry le
         ON le.subject_id = cs.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_size_h)s' END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END
+            AND le.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
+            AND le.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
     GROUP BY cs.stay_id
 )
 
@@ -141,19 +122,16 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
         , STDDEV(neutrophils_abs) AS abs_neutrophils_std
         
     FROM mimiciv_derived.cohort_selection cs
-    LEFT JOIN sepsis
-        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
         on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.blood_differential le
         ON le.subject_id = cs.subject_id
-            AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_size_h)s' END
-            AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END
+            AND le.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
+            AND le.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
     GROUP BY cs.stay_id
 )
 
 , gcs as (
-        WITH sepsis AS (SELECT stay_id, sofa_time as sepsis_onset FROM mimiciv_derived.sepsis3)
     SELECT 
         MAX(gcs.gcs_motor) as gcs_motor_max,
         MIN(gcs.gcs_motor) as gcs_motor_min,
@@ -173,19 +151,16 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
         (STDDEV(gcs.gcs_motor) + STDDEV(gcs.gcs_verbal) + STDDEV(gcs.gcs_eyes)) AS gcs_total_stddev,
 		cs.stay_id
     FROM mimiciv_derived.cohort_selection cs
-    LEFT JOIN mimiciv_derived.sepsis3 sepsis
-        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
             on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.gcs gcs
         ON cs.subject_id = gcs.subject_id
-            AND gcs.charttime >= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR END)
-            AND gcs.charttime <= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END)
+            AND gcs.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
+            AND gcs.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
     GROUP BY cs.subject_id, cs.stay_id
 )
 
 , lab as (
-    WITH sepsis AS (SELECT stay_id FROM mimiciv_derived.sepsis3)
     SELECT
     MIN(heart_rate) AS heart_rate_min
     , MAX(heart_rate) AS heart_rate_max
@@ -212,11 +187,9 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
     , AVG(temperature) AS temperature_mean
     , STDDEV(temperature) AS temperature_std
 
-    , CASE WHEN cs.stay_id in (SELECT * FROM sepsis) THEN 1 ELSE 0 END AS sepsis
+    , MAX(srt.sepsis3) as sepsis
 	, cs.stay_id
     FROM mimiciv_derived.cohort_selection cs
-    LEFT JOIN mimiciv_derived.sepsis3 sepsis
-        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
             on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.vitalsign vs
@@ -224,8 +197,8 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_
         -- pre septic window defined as 24 hours before sepsis onset
         -- if no sepsis onset, then 24 hours after ICU admission to get the same window size
         -- resolution could be improved ..
-            AND vs.charttime >= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR END)
-            AND vs.charttime <= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END)
+            AND vs.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
+            AND vs.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
     GROUP BY cs.subject_id, cs.stay_id
 )
 SELECT

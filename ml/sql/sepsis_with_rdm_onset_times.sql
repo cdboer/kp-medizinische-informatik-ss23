@@ -7,12 +7,12 @@ CASE WHEN s.sofa_time is null
           JOIN mimiciv_derived.sepsis3 s on cs.stay_id = s.stay_id  
           JOIN mimiciv_icu.icustays ie2 on ie2.stay_id = cs.stay_id
 		  where s.sofa_time is not null 
-          AND ((s.sofa_time - ie2.intime) >= INTERVAL '8' hour)
+          AND ((s.sofa_time - ie2.intime) >= INTERVAL '%(window_size_h)s' hour)
           ORDER BY RANDOM() LIMIT 1
         ) 
     else s.sofa_time 
 end,
-CASE when s.sepsis3 is null then 0 else 1 end
+CASE when s.sepsis3 is null then 0 else 1 end as sepsis3
 FROM mimiciv_derived.cohort_selection cs
 LEFT JOIN mimiciv_derived.sepsis3 s on s.stay_id = cs.stay_id
 LEFT JOIN mimiciv_icu.icustays ie on ie.stay_id = cs.stay_id
