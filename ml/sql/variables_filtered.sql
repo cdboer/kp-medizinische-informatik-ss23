@@ -56,12 +56,12 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         STDDEV(ph) AS ph_std,
 
         
-		ie.stay_id
-    FROM mimiciv_icu.icustays ie
-        LEFT JOIN mimiciv_derived.sepsis3 sepsis ON ie.stay_id = sepsis.stay_id
+		cs.stay_id
+    FROM mimiciv_derived.cohort_selection cs
+        LEFT JOIN mimiciv_derived.sepsis3 sepsis ON cs.stay_id = sepsis.stay_id
         LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
-            on ie.stay_id = srt.stay_id
-        LEFT JOIN mimiciv_derived.bg bg ON ie.subject_id = bg.subject_id
+            on cs.stay_id = srt.stay_id
+        LEFT JOIN mimiciv_derived.bg bg ON cs.subject_id = bg.subject_id
         AND bg.charttime >= (
             CASE
                 WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_size_h)s'
@@ -74,36 +74,36 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
                 ELSE sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
             END
         )
-    GROUP BY ie.subject_id,
-        ie.stay_id
+    GROUP BY cs.subject_id,
+        cs.stay_id
 )
 
 , cbc AS (
     SELECT
-        ie.stay_id
+        cs.stay_id
        
         , MIN(platelet) AS platelets_min
         , MAX(platelet) AS platelets_max
         , AVG(platelet) AS platelets_avg
         , STDDEV(platelet) AS platelets_std
        
-    FROM mimiciv_icu.icustays ie
+    FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN sepsis
-        ON ie.stay_id = sepsis.stay_id
+        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
-        on ie.stay_id = srt.stay_id
+        on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.complete_blood_count le
-        ON le.subject_id = ie.subject_id
+        ON le.subject_id = cs.subject_id
             AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_size_h)s' END
             AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END
 
     
-    GROUP BY ie.stay_id
+    GROUP BY cs.stay_id
 )
 
 , chem AS (
     SELECT
-        ie.stay_id
+        cs.stay_id
         , MIN(albumin) AS albumin_min, MAX(albumin) AS albumin_max
         , AVG(albumin) AS albumin_mean, STDDEV(albumin) AS albumin_std
        
@@ -119,37 +119,37 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         , AVG(sodium) AS sodium_avg, STDDEV(sodium) AS sodium_std
         , MIN(potassium) AS potassium_min, MAX(potassium) AS potassium_max
         , AVG(potassium) AS potassium_avg, STDDEV(potassium) AS potassium_std
-    FROM mimiciv_icu.icustays ie
+    FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN sepsis
-        ON ie.stay_id = sepsis.stay_id
+        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
-            on ie.stay_id = srt.stay_id
+            on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.chemistry le
-        ON le.subject_id = ie.subject_id
+        ON le.subject_id = cs.subject_id
             AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_size_h)s' END
             AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END
-    GROUP BY ie.stay_id
+    GROUP BY cs.stay_id
 )
 
 , diff AS (
     SELECT
-        ie.stay_id
+        cs.stay_id
        
         , MIN(neutrophils_abs) AS abs_neutrophils_min
         , MAX(neutrophils_abs) AS abs_neutrophils_max
         , AVG(neutrophils_abs) AS abs_neutrophils_avg
         , STDDEV(neutrophils_abs) AS abs_neutrophils_std
         
-    FROM mimiciv_icu.icustays ie
+    FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN sepsis
-        ON ie.stay_id = sepsis.stay_id
+        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
-        on ie.stay_id = srt.stay_id
+        on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.blood_differential le
-        ON le.subject_id = ie.subject_id
+        ON le.subject_id = cs.subject_id
             AND le.charttime >= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_size_h)s' END
             AND le.charttime <= CASE WHEN sepsis.sofa_time IS NOT NULL THEN sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END
-    GROUP BY ie.stay_id
+    GROUP BY cs.stay_id
 )
 
 , gcs as (
@@ -171,17 +171,17 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
         (MIN(gcs.gcs_motor) + MIN(gcs.gcs_verbal) + MIN(gcs.gcs_eyes)) AS gcs_total_min,
         (AVG(gcs.gcs_motor) + AVG(gcs.gcs_verbal) + AVG(gcs.gcs_eyes)) AS gcs_total_avg,
         (STDDEV(gcs.gcs_motor) + STDDEV(gcs.gcs_verbal) + STDDEV(gcs.gcs_eyes)) AS gcs_total_stddev,
-		ie.stay_id
-    FROM mimiciv_icu.icustays ie
+		cs.stay_id
+    FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN mimiciv_derived.sepsis3 sepsis
-        ON ie.stay_id = sepsis.stay_id
+        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
-            on ie.stay_id = srt.stay_id
+            on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.gcs gcs
-        ON ie.subject_id = gcs.subject_id
+        ON cs.subject_id = gcs.subject_id
             AND gcs.charttime >= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR END)
             AND gcs.charttime <= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END)
-    GROUP BY ie.subject_id, ie.stay_id
+    GROUP BY cs.subject_id, cs.stay_id
 )
 
 , lab as (
@@ -212,25 +212,25 @@ sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
     , AVG(temperature) AS temperature_mean
     , STDDEV(temperature) AS temperature_std
 
-    , CASE WHEN ie.stay_id in (SELECT * FROM sepsis) THEN 1 ELSE 0 END AS sepsis
-	, ie.stay_id
-    FROM mimiciv_icu.icustays ie
+    , CASE WHEN cs.stay_id in (SELECT * FROM sepsis) THEN 1 ELSE 0 END AS sepsis
+	, cs.stay_id
+    FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN mimiciv_derived.sepsis3 sepsis
-        ON ie.stay_id = sepsis.stay_id
+        ON cs.stay_id = sepsis.stay_id
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
-            on ie.stay_id = srt.stay_id
+            on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.vitalsign vs
-        ON ie.subject_id = vs.subject_id
+        ON cs.subject_id = vs.subject_id
         -- pre septic window defined as 24 hours before sepsis onset
         -- if no sepsis onset, then 24 hours after ICU admission to get the same window size
         -- resolution could be improved ..
             AND vs.charttime >= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_size_h)s' HOUR END)
             AND vs.charttime <= (CASE WHEN sepsis.sofa_time IS NULL THEN srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR ELSE sepsis.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR END)
-    GROUP BY ie.subject_id, ie.stay_id
+    GROUP BY cs.subject_id, cs.stay_id
 )
 SELECT
-    ie.subject_id
-    --, ie.stay_id
+    cs.subject_id
+    --, cs.stay_id
     -- complete blood count
 	, lab.*
     , cbc.*
@@ -238,17 +238,17 @@ SELECT
     , diff.*
     , gcs.*
     , bga.*
-FROM mimiciv_icu.icustays ie
+FROM mimiciv_derived.cohort_selection cs
 LEFT JOIN cbc
-    ON ie.stay_id = cbc.stay_id
+    ON cs.stay_id = cbc.stay_id
 LEFT JOIN chem
-    ON ie.stay_id = chem.stay_id
+    ON cs.stay_id = chem.stay_id
 LEFT JOIN diff
-    ON ie.stay_id = diff.stay_id
+    ON cs.stay_id = diff.stay_id
 Left Join lab
-	on ie.stay_id = lab.stay_id
+	on cs.stay_id = lab.stay_id
 LEFT JOIN gcs
-    on ie.stay_id = gcs.stay_id
+    on cs.stay_id = gcs.stay_id
 LEFT JOIN bga
-    on ie.stay_id = bga.stay_id
+    on cs.stay_id = bga.stay_id
 ;
