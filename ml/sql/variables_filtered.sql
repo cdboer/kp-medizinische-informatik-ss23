@@ -1,6 +1,6 @@
 -- DROP TABLE IF EXISTS mimiciv_derived.pre_septic_lab_24h; CREATE TABLE mimiciv_derived.pre_septic_lab_24h  AS
 WITH 
-sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis3)
+sepsis AS (SELECT stay_id, sofa_time FROM mimiciv_derived.sepsis_with_rdm_onset_time)
 
 
 , bga as (
