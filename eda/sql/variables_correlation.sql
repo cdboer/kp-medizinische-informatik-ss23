@@ -48,7 +48,7 @@ bga as (
     , STDDEV(fibrinogen) AS fibrinogen_std
     , MIN(thrombin) AS thrombin_min
     , MAX(thrombin) AS thrombin_max
-    , AVG(thrombin) AS thrombin_avg
+    , AVG(thrombin) AS thrombin_mean
     FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
         on cs.stay_id = srt.stay_id
@@ -83,7 +83,7 @@ bga as (
         , AVG(albumin) AS albumin_mean
         , MIN(globulin) AS globulin_min
         , MAX(globulin) AS globulin_max
-        , AVG(globulin) as globulin_avg
+        , AVG(globulin) as globulin_mean
 
        FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt
@@ -117,7 +117,7 @@ bga as (
         , STDDEV(immature_granulocytes) AS imm_granulocytes_std
         , MIN(immature_granulocytes) AS imm_granulocytes_min
         , MAX(immature_granulocytes) AS imm_granulocytes_max
-        , AVG(immature_granulocytes) AS imm_granulocytes_avg
+        , AVG(immature_granulocytes) AS imm_granulocytes_mean
         , STDDEV(eosinophils_abs) AS abs_eosinophils_std
         , STDDEV(monocytes_abs) AS abs_monocytes_std
         , STDDEV(bands) AS bands_std
@@ -136,20 +136,20 @@ bga as (
     SELECT 
         MAX(gcs.gcs_motor) as gcs_motor_max,
         MIN(gcs.gcs_motor) as gcs_motor_min,
-        AVG(gcs.gcs_motor) as gcs_motor_avg,
-        STDDEV(gcs.gcs_motor) as gcs_motor_stddev,
+        AVG(gcs.gcs_motor) as gcs_motor_mean,
+        STDDEV(gcs.gcs_motor) as gcs_motor_std,
         MAX(gcs.gcs_verbal) as gcs_verbal_max,
         MIN(gcs.gcs_verbal) as gcs_verbal_min,
-        AVG(gcs.gcs_verbal) as gcs_verbal_avg,
-        STDDEV(gcs.gcs_verbal) as gcs_verbal_stddev,
+        AVG(gcs.gcs_verbal) as gcs_verbal_mean,
+        STDDEV(gcs.gcs_verbal) as gcs_verbal_std,
         MAX(gcs.gcs_eyes) as gcs_eyes_max,
         MIN(gcs.gcs_eyes) as gcs_eyes_min,
-        AVG(gcs.gcs_eyes) as gcs_eyes_avg,
-        STDDEV(gcs.gcs_eyes) as gcs_eyes_stddev,
+        AVG(gcs.gcs_eyes) as gcs_eyes_mean,
+        STDDEV(gcs.gcs_eyes) as gcs_eyes_std,
         (MAX(gcs.gcs_motor) + MAX(gcs.gcs_verbal) + MAX(gcs.gcs_eyes)) AS gcs_total_max,
         (MIN(gcs.gcs_motor) + MIN(gcs.gcs_verbal) + MIN(gcs.gcs_eyes)) AS gcs_total_min,
-        (AVG(gcs.gcs_motor) + AVG(gcs.gcs_verbal) + AVG(gcs.gcs_eyes)) AS gcs_total_avg,
-        (STDDEV(gcs.gcs_motor) + STDDEV(gcs.gcs_verbal) + STDDEV(gcs.gcs_eyes)) AS gcs_total_stddev,
+        (AVG(gcs.gcs_motor) + AVG(gcs.gcs_verbal) + AVG(gcs.gcs_eyes)) AS gcs_total_mean,
+        (STDDEV(gcs.gcs_motor) + STDDEV(gcs.gcs_verbal) + STDDEV(gcs.gcs_eyes)) AS gcs_total_std,
 		cs.stay_id
     FROM mimiciv_derived.cohort_selection cs
     LEFT JOIN mimiciv_derived.sepsis_with_rdm_onset_time srt

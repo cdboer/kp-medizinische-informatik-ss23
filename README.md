@@ -39,6 +39,7 @@ host = "..."     # Host IP address
 port = 5432      # Host port
 ```
 - [Optionally]: Install project dependencies by running `pip install -r requirements.txt` in the project's root directory. Not required as the notebooks contain their own dependency lists and install the dependencies automatically.
+- Comment out the `exec_sql` lines in the third code cell of the [`/eda/eda.ipynb`](eda/eda.ipynb) and [`/ml/ml.ipynb`](ml/ml.ipynb) notebooks if the required tables have already been created in the database.
 - Execute the [`/eda/eda.ipynb`](eda/eda.ipynb) and [`/ml/ml.ipynb`](ml/ml.ipynb) notebooks.
 That's it! You're good to go! 🚀
 
