@@ -1,4 +1,3 @@
--- DROP TABLE IF EXISTS mimiciv_derived.pre_septic_lab_24h; CREATE TABLE mimiciv_derived.pre_septic_lab_24h  AS
 WITH 
 bga as (
         /*
@@ -76,8 +75,6 @@ bga as (
         ON le.subject_id = cs.subject_id
             AND le.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
             AND le.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
-
-    
     GROUP BY cs.stay_id
 )
 
@@ -191,17 +188,12 @@ bga as (
             on cs.stay_id = srt.stay_id
     LEFT JOIN mimiciv_derived.vitalsign vs
         ON cs.subject_id = vs.subject_id
-        -- pre septic window defined as 24 hours before sepsis onset
-        -- if no sepsis onset, then 24 hours after ICU admission to get the same window size
-        -- resolution could be improved ..
             AND vs.charttime >= srt.sofa_time - INTERVAL '%(window_size_h)s' HOUR
             AND vs.charttime <= srt.sofa_time - INTERVAL '%(window_stop_size_h)s' HOUR
     GROUP BY cs.subject_id, cs.stay_id
 )
 SELECT
     cs.subject_id
-    --, cs.stay_id
-    -- complete blood count
 	, lab.*
     , cbc.*
     , chem.*

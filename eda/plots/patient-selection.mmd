@@ -1,0 +1,10 @@
+graph TB
+A["ICU Admissions: 73181 Stays"]
+A -->|Age < 18| B["Exclude: Age < 18 - 0 Stays"]
+A -->|Age >= 18| C["Screen for Minimum Stay Duration: 73181 Stays"]
+C -->|Stay >= 8 hours| D["Exclude: Sepsis at Admission - 300 Stays"]
+C -->|Stay >= 8 hours| E["Screen for Sepsis: 500 Stays"]
+E -->|Develops Sepsis| F["Exclude: Stay < 6 Hours - 100 Stays"]
+E -->|Develops Sepsis| G["Screen for Sepsis Onset: 400 Stays"]
+G -->|8h after admission| H["Exclude: Sepsis at Admission - 100 Stays"]
+G -->|Sepsis 8h after admission| H["Exclude: Sepsis at Admission - 100 Stays"]
